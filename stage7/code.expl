@@ -1,0 +1,107 @@
+type 
+    List{
+        int i,j,k;
+        str a,b,c;
+        int as,jk;
+        
+    }
+    ArbList{
+        int Ai;
+        str Aa;
+        List tt;
+        ArbList LL;
+    }
+endtype
+class 
+    bst{
+        decl
+            int a,fn(int p,int q),fn2();
+            ArbList l;
+        enddecl
+        int fn(int p,int q){
+            decl
+                int pa;
+                str po;
+            enddecl
+            begin
+                self.a=self.fn(pa,pa)+pa;
+                return self.a;
+            end
+        }
+        int fn2(){
+            decl 
+                int pa2;
+            enddecl
+            begin
+                self.l.Ai=self.fn(pa2,pa2)+pa2;
+                return 0;
+            end
+        }
+    }
+    bst1{
+        decl
+            int b,fn3(int x,int y);
+            bst l;
+        enddecl
+        int fn3(int x,int y){
+            begin
+                self.l.a=1;
+                self.l.a=self.l.fn(0,0);
+                return 0;
+            end
+        }
+    }
+endclass
+decl
+    int i,fn(int p,List h);
+    List L;
+    ArbList A;
+    bst b;
+    bst1 b1;
+enddecl
+int fn(int p,List h){
+    decl
+        int j;
+        List L;
+        ArbList A;
+    enddecl
+    begin
+        initialize();
+        j=0;
+        b=new(bst);
+        b=b;
+        A=alloc();
+        //b.l=alloc();//error
+        //b.a=0;//error
+        j=b.fn2();
+        j=b.fn(L.i,j);
+        b1=new(bst1);
+        //b1.l=alloc();//error        
+        j=b1.fn3(3,4);
+        A.tt=alloc();
+        A.LL=null;
+        read(A.tt.i);
+        A.tt.i=10+A.tt.i;
+        write(A.tt.i);
+        i=free(A.tt);
+        i=free(A);
+        if(A.LL!=null)then
+            i=0;
+        endif;
+        //b1.b=0;//error
+        return 0;
+    end
+}
+int main(){
+    decl
+        int j;
+        str a;
+        List L;
+        ArbList A;
+    enddecl
+    begin
+        //b1.b=0;//error
+        j=0;
+        return 0;
+    end
+}
