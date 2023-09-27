@@ -5,3 +5,4 @@ int read(tnode*);
 int calculate(tnode*);
 int write(tnode*);
 int getVar(tnode*,int);
+int evalCtrl(tnode *t);

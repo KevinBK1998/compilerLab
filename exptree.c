@@ -2,10 +2,17 @@
 #include<stdio.h>
 #include<string.h>
 #include "exptree.h"
-tnode *makeOpNode(char op,tnode *left,tnode *right){
+tnode *makeOpNode(char op,tnode *left,tnode *right,int type){
+  if(type==INTEGER){
+    if((left->ntype==OPERATOR&&left->dtype!=type)||(right->ntype==OPERATOR&&right->dtype!=type)){
+      printf("Type Mismatch:Expected Integer\n");
+      exit(1);
+    }
+  }
   tnode *p=(tnode*)malloc(sizeof(tnode));
   p->var=op;
   p->ntype=OPERATOR;
+  p->dtype=type;
   p->l=left;
   p->r=right;
   return p;
@@ -42,4 +49,17 @@ tnode *makeConNode(tnode *left,tnode *right){
   p->l=left;
   p->r=right;
   return p;
+}
+tnode *makeCtrlNode(tnode *left,tnode *right,int type){
+  if((type==SIMPLE_IF||type==WHILE_LOOP)&&left->dtype!=BOOLEAN)
+  {
+    printf("Type Mismatch:Expected Boolean\n");
+    exit(1); 
+  }
+  tnode *p=(tnode*)malloc(sizeof(tnode));
+    p->ntype=CONTROL;
+    p->dtype=type;
+    p->l=left;
+    p->r=right;
+    return p;
 }

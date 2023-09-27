@@ -1,7 +1,7 @@
 //Code for evaluating an expression tree with static memory allocation
 #include<stdio.h>
 #include "evaluate.h"
-// #include "exptree.c"  //comment before use
+//#include "exptree.c"  //comment before use
 static int MEMORY[26];
 int evalCode(tnode *t){
     switch(t->ntype){
@@ -16,6 +16,9 @@ int evalCode(tnode *t){
         evalCode(t->l);
         evalCode(t->r);
         return 0;
+      case CONTROL:
+        evalCtrl(t);//add code
+        return 0;
     }
 }
 int read(tnode *t){
@@ -27,7 +30,14 @@ int calculate(tnode *exp){
     if(exp->ntype){
         switch(exp->var){
             case '+':return calculate(exp->l)+calculate(exp->r);
+            case '-':return calculate(exp->l)-calculate(exp->r);
             case '*':return calculate(exp->l)*calculate(exp->r);
+            case '/':return calculate(exp->l)/calculate(exp->r);
+            case '%':return calculate(exp->l)%calculate(exp->r);
+            case '<':if(calculate(exp->l)<calculate(exp->r))return 1;
+                    return 0;
+            case '>':if(calculate(exp->l)>calculate(exp->r))return 1;
+                    return 0;
             case '=':
             MEMORY[getVar(exp->l,LVAL)]=calculate(exp->r);return getVar(exp->l,RVAL);
         }
@@ -50,4 +60,26 @@ int getVar(tnode *varNode,int val){
     else
         i=varNode->var-'a';
     return i;
+}
+int evalCtrl(tnode *t){
+    switch(t->dtype){
+        case SIMPLE_IF:
+            if(evalCode(t->l)){
+                evalCode(t->r);
+                return 0;
+            }
+            return 1;
+        case IF_ELSE:
+            evalCode(t->l);
+            return 0;
+        case IF_ELSE_HEAD:
+            if(evalCtrl(t->l))
+                return evalCode(t->r);
+        case WHILE_LOOP:
+            if(evalCode(t->l)){
+                evalCode(t->r);
+                evalCtrl(t);
+            }
+            return 0;
+    }
 }
