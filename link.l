@@ -1,5 +1,7 @@
 %{
-//Lexical Analyser for label translation
+/*Lexical Analyser for label translation
+    1.Labels start with 'L' followed by a unique id
+*/
 #include<stdio.h>
 #include "linklist.c"
 #define FIN "x.xobj"

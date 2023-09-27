@@ -1,14 +1,16 @@
 %{
-//Lexical Analyser to identify numbers,identifiers,operators,keywords
+//Lexical Analyser to identify numbers,identifiers,operators,keywords,comments
 #include<stdio.h>
 #include<stdlib.h>
 #include "y.tab.h"
 #include "exptree.h"
 %}
 
+comment1 "//"[\40-\176\t]*
+comment2 "/*"[\40-\176\t\n]*"*/"
 num [0-9]+
 id [a-zA-Z][a-zA-Z0-9]*
-op [-*+/%()=;<>!{},\[\]]
+op [-*+/%)=;<>!{},&\[\]]
 string ["][\40-\176]*["]
 and "and"
 or "or"
@@ -34,14 +36,15 @@ enddecl "enddecl"
 end "end"
 
 %%
+{comment2}  {}
+{comment1}  {}
 {num}   {int i=atoi(yytext);yylval.node=makeNumNode(i);return NUM;}
 {op}    {return *yytext;}
+"("     {return *yytext;}
 "<="    {return LSEQ;}
 ">="    {return GTEQ;}   
 "=="    {return EQTO;}
 "!="    {return NTEQ;}
-"++"    {return INCRMNT;}
-"--"    {return DECRMNT;}
 {beg}   {return BEG;}
 {if}    {return IF;}
 {else}  {return ELSE;}

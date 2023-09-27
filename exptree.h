@@ -16,7 +16,12 @@
 #define INTEGER 1
 #define BOOLEAN 2 
 #define STRING 3
-#define ARRAY1 4
+#define PTR 5214
+//Identifier Type
+#define VARIABLE 0
+#define POINTER 1
+#define ARRAY1D 2
+#define ARRAY2D 3
 //Node Type
 #define CONSTANT 0
 #define OPERATOR 1
@@ -30,7 +35,7 @@ typedef struct snode{
     char *name;
     int dtype;
     int size;
-    int rowsize;
+    int csize;
     int bind;
     struct snode *n;
 }snode;
@@ -53,4 +58,5 @@ tnode *makeUNode(tnode*,tnode*,int);
 tnode *makeFnNode(int,tnode*);
 tnode *makeConNode(tnode*,tnode*);
 tnode *CtrlNode(tnode*,tnode*,tnode*,int);
+tnode *makePtrNode(char*,tnode *);
 #endif

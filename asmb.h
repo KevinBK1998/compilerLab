@@ -1,7 +1,9 @@
 #define RMAX 20
 #define OUT_LOOP 0
 #define IN_LOOP 1
-int getReg();
+int getFreshReg();
+int saveRegToStack();
+void loadRegFromStack(int);
 void freeReg();
 int codeInit(char*);
 int codeGen(tnode*,int,int,int);
