@@ -1,5 +1,5 @@
 begin
-    do
+    while(1<2)do
         read(a);
         if(a<1)then
             break;
@@ -7,6 +7,6 @@ begin
             continue;
         endif;
         write(a);
-    endwhile(1<2);
+    endwhile;
     write(a);
 end;
