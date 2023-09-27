@@ -1,7 +1,7 @@
 XSM_DIR = ~/compilerLab/xsm_expl
 copy: a.xsm
 	cp $< ${XSM_DIR}
-link: linker.exe e2.xobj
+link: linker.exe x.xobj
 	./linker.exe
 compile: compiler.exe code.expl
 	./compiler.exe code.expl

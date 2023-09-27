@@ -14,8 +14,12 @@ then [t][h][e][n]
 else [e][l][s][e]
 endif [e][n][d][i][f]
 while   [w][h][i][l][e]
-do  [d][o]
+do  "do"
 endwhile    [e][n][d][w][h][i][l][e]
+repeat [r][e][p][e][a][t]
+until [u][n][t][i][l]
+break [b][r][e][a][k]
+continue [c][o][n][t][i][n][u][e]
 write [w][r][i][t][e]
 end [e][n][d]
 
@@ -30,7 +34,11 @@ end [e][n][d]
 {endif} {return ENDIF;}
 {while} {return WHILE;}
 {do}    {return DO;}
+{repeat}    {return REPEAT;}
+{until}     {return UNTIL;}
 {endwhile} {return ENDWHILE;}
+{break} {return BREAK;}
+{continue} {return CONTINUE;}
 {read}  {return READ;}
 {write} {return WRITE;}
 {end}   {return END;}

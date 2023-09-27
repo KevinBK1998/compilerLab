@@ -15,6 +15,7 @@ tnode *makeOpNode(char op,tnode *left,tnode *right,int type){
   p->dtype=type;
   p->l=left;
   p->r=right;
+  p->e=NULL;
   return p;
 }
 tnode *makeNumNode(int n){
@@ -24,6 +25,16 @@ tnode *makeNumNode(int n){
   p->val=n;
   p->l=NULL;
   p->r=NULL;
+  p->e=NULL;
+  return p;
+}
+tnode *makeUNode(tnode *left,tnode *right,int type){
+  tnode *p=(tnode*)malloc(sizeof(tnode));
+  p->ntype=JMP;
+  p->dtype=type;
+  p->l=left;
+  p->r=right;
+  p->e=NULL;
   return p;
 }
 tnode *makeIdNode(char c){
@@ -33,6 +44,7 @@ tnode *makeIdNode(char c){
   p->var=c;
   p->l=NULL;
   p->r=NULL;
+  p->e=NULL;
   return p;
 }
 tnode *makeFnNode(int fcode,tnode *arg){
@@ -41,6 +53,7 @@ tnode *makeFnNode(int fcode,tnode *arg){
   p->ntype=FUNCTION;
   p->l=arg;
   p->r=NULL;
+  p->e=NULL;
   return p;
 }
 tnode *makeConNode(tnode *left,tnode *right){
@@ -48,10 +61,11 @@ tnode *makeConNode(tnode *left,tnode *right){
   p->ntype=CONNECTION;
   p->l=left;
   p->r=right;
+  p->e=NULL;
   return p;
 }
 tnode *makeCtrlNode(tnode *left,tnode *right,tnode *Else,int type){
-  if((type==SIMPLE_IF||type==WHILE_LOOP)&&left->dtype!=BOOLEAN)
+  if(((type==SIMPLE_IF||type==WHILE_LOOP)&&left->dtype!=BOOLEAN)||((type==REPEAT_LOOP||type==DO_LOOP)&&right->dtype!=BOOLEAN))
   {
     printf("Type Mismatch:Expected Boolean\n");
     exit(1); 

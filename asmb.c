@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<string.h>
 #include "asmb.h"
-#define FOUT "e2" 
+#define FOUT "x" 
 //#include "exptree.c"  //comment before use
 int regcount=-1,lblct=-1;
 FILE *out;
@@ -29,7 +29,7 @@ int codeInit(char *fnme){
     fprintf(out,"BRKP\nMOV SP,%d\n",SP);
     return 1;
 }
-int codeGen(tnode *root){
+int codeGen(tnode *root,int lc,int lb,int pos){
   switch(root->ntype){
     case OPERATOR:
       return expCodeGen(root);
@@ -39,12 +39,39 @@ int codeGen(tnode *root){
       else
         return fnWrite(root->l);
     case CONNECTION:
-      codeGen(root->l);
-      codeGen(root->r);
+      codeGen(root->l,lc,lb,pos);
+      codeGen(root->r,lc,lb,pos);
       return 0;
     case CONTROL:
-        ctrlCodeGen(root);
-        return 0;
+      ctrlCodeGen(root,lc,lb,pos);
+      return 0;
+    case JMP:
+      return brkFlowGen(root,lc,lb,pos);
+      
+  }
+}
+int brkFlowGen(tnode *root,int lc,int lb,int pos){
+  int l1,reg;
+  if(pos==OUT_LOOP){
+    if(root->l!=NULL)
+      codeGen(root->l,lc,lb,pos);
+    if(root->r!=NULL)
+      codeGen(root->r,lc,lb,pos);
+    return 0;
+  }
+  if(root->dtype==BREAK_LOOP){
+    if(root->l!=NULL)
+      codeGen(root->l,lc,lb,pos);
+    fprintf(out,"JMP L%d\n",lb);
+    if(root->r!=NULL)
+      codeGen(root->r,lc,lb,pos);
+  }
+  else{
+    if(root->l!=NULL)
+      codeGen(root->l,lc,lb,pos);
+      fprintf(out,"JMP L%d\n",lc);
+      if(root->r!=NULL)
+        codeGen(root->r,lc,lb,pos);
   }
 }
 int codeRead(int r){
@@ -79,7 +106,7 @@ int codeExit(){
 int codeAsmble(tnode *code){
     codeInit(FOUT);
     if(code)
-      codeGen(code);
+      codeGen(code,-1,-1,OUT_LOOP);
     codeExit();
     fclose(out);
     printf("Build Successful\n");
@@ -150,14 +177,14 @@ int expCodeGen(tnode *exp){
       return rega;
   }
 }
-int ctrlCodeGen(tnode *exp){
+int ctrlCodeGen(tnode *exp,int lc,int lb,int pos){
   int l1,l2,reg;
     switch(exp->dtype){
         case SIMPLE_IF:
           l1=getLabel();
           reg=expCodeGen(exp->l);
           fprintf(out,"JZ R%d,L%d\n",reg,l1);
-          codeGen(exp->r);
+          codeGen(exp->r,lc,lb,pos);
           fprintf(out,"L%d:",l1);
           freeReg();
           return 1;
@@ -166,9 +193,9 @@ int ctrlCodeGen(tnode *exp){
           l2=getLabel();
           reg=expCodeGen(exp->l);
           fprintf(out,"JZ R%d,L%d\n",reg,l1);
-          codeGen(exp->r);
+          codeGen(exp->r,lc,lb,pos);
           fprintf(out,"JMP L%d\nL%d:",l2,l1);
-          codeGen(exp->e);
+          codeGen(exp->e,lc,lb,pos);
           fprintf(out,"L%d:",l2);  
           freeReg();       
           return 1;
@@ -178,8 +205,26 @@ int ctrlCodeGen(tnode *exp){
           fprintf(out,"L%d:",l1);
           reg=expCodeGen(exp->l);
           fprintf(out,"JZ R%d,L%d\n",reg,l2);
-          codeGen(exp->r);
+          codeGen(exp->r,l1,l2,IN_LOOP);
           fprintf(out,"JMP L%d\nL%d:",l1,l2);
+          freeReg();
+          return 1;
+        case DO_LOOP:
+          l1=getLabel();
+          l2=getLabel();
+          fprintf(out,"L%d:",l1);
+          codeGen(exp->l,l1,l2,IN_LOOP);
+          reg=expCodeGen(exp->r);
+          fprintf(out,"JNZ R%d,L%d\nL%d:",reg,l1,l2);
+          freeReg();
+          return 1;
+        case REPEAT_LOOP:
+          l1=getLabel();
+          l2=getLabel();
+          fprintf(out,"L%d:",l1);
+          codeGen(exp->l,l1,l2,IN_LOOP);
+          reg=expCodeGen(exp->r);
+          fprintf(out,"JZ R%d,L%d\nL%d:",reg,l1,l2);
           freeReg();
           return 1;
     }

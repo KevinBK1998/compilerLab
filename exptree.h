@@ -2,6 +2,10 @@
 #define SIMPLE_IF 0
 #define IF_ELSE 1
 #define WHILE_LOOP 2
+#define BREAK_LOOP 3
+#define CONT_LOOP 4
+#define REPEAT_LOOP 5
+#define DO_LOOP 6
 //Function type
 #define FN_WRITE 0
 #define FN_READ 1
@@ -18,6 +22,7 @@
 #define FUNCTION 2
 #define CONNECTION 3
 #define CONTROL 4
+#define JMP 5
 typedef struct tnode{
     int val;
     int dtype;
@@ -28,6 +33,7 @@ typedef struct tnode{
 tnode *makeOpNode(char,tnode*,tnode*,int);
 tnode *makeNumNode(int);
 tnode *makeIdNode(char);
+tnode *makeUNode(tnode*,tnode*,int);
 tnode *makeFnNode(int,tnode*);
 tnode *makeConNode(tnode*,tnode*);
 tnode *CtrlNode(tnode*,tnode*,tnode*,int);
