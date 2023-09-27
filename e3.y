@@ -1,34 +1,32 @@
 %{
-//Parser to print prefix of an infix expression made of strings and operators
-//eg:hello+world
+//Parser to identify prefix form syntax and convert to '.xexe' format
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-#define YYSTYPE char*
+#include "exptree.c"
+#include "asmb.c"
+#define YYSTYPE tnode*
 %}
 
-%token ID
-%left '+''-'
-%left '*''/''%'
-%left '('')'
+%token NUM PLUS MIN MUL DIV MOD
+%left PLUS MIN MUL DIV MOD
 
 %%
-prg:expr'\n'	{printf("%s\nBYE\n",$1);free($$);}
-	;
-expr:expr'+'expr	{char *p=(char*)malloc((strlen($1)+strlen($3)+4)*sizeof(char));strcat(p,"+ ");strcat(p,$1);strcat(p," ");strcat(p,$3);strcat(p," ");$$=strdup(p);free(p);}
-	|expr'-'expr	{char *p=(char*)malloc((strlen($1)+strlen($3)+4)*sizeof(char));strcat(p,"- ");strcat(p,$1);strcat(p," ");strcat(p,$3);strcat(p," ");$$=strdup(p);free(p);}
-	|expr'*'expr	{char *p=(char*)malloc((strlen($1)+strlen($3)+4)*sizeof(char));strcat(p,"* ");strcat(p,$1);strcat(p," ");strcat(p,$3);strcat(p," ");$$=strdup(p);free(p);}
-	|expr'/'expr	{char *p=(char*)malloc((strlen($1)+strlen($3)+4)*sizeof(char));strcat(p,"/ ");strcat(p,$1);strcat(p," ");strcat(p,$3);strcat(p," ");$$=strdup(p);free(p);}
-	|expr'%'expr	{char *p=(char*)malloc((strlen($1)+strlen($3)+4)*sizeof(char));strcat(p,"%% ");strcat(p,$1);strcat(p," ");strcat(p,$3);strcat(p," ");$$=strdup(p);free(p);}
-	|'('expr')'		{strcpy($$,$2);}
-	|ID						{strcpy($$,$1);}
-	;
+prg:expr'\n'        {printf("Compiled Successfully\n");return $$;}
+    ;
+expr:PLUS expr expr {$$=makeOpNode('+',$2,$3);}
+    |MIN expr expr	{$$=makeOpNode('-',$2,$3);}
+    |MUL expr expr	{$$=makeOpNode('*',$2,$3);}
+    |DIV expr expr	{$$=makeOpNode('/',$2,$3);}
+    |MOD expr  expr	{$$=makeOpNode('%',$2,$3);}
+    |NUM			{$$=$1;}
+    ;
 %%
 
-yyerror(){
-	printf("ERROR ");
+yyerror(char *err){
+   	printf("ERROR:%s\n",err);
 }
 int main(){
-	yyparse();
-	return 1;
+    codeAsmble(yyparse());
+    printf("Created executable\n");
+    exit(1);
 }

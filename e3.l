@@ -1,21 +1,31 @@
 %{
-//Lexical Analyser to identify operators and string as tokens
-//eg:"hello",'+',"world"
+//Lexical Analyser to identify numbers and operators as tokens and make leafnodes from numbers
 #include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
 #include "y.tab.h"
+int opDec(char);
 %}
 
-id [a-zA-Z]+
+num [0-9]+
 op [-+*/%]
 
 %%
-{id}	{yylval=(char*)malloc(yyleng*sizeof(char));strcpy(yylval,yytext);return ID;}
-{op}	{return *yytext;}
+{num}	{int p=atoi(yytext);yylval=makeLfNode(p);return NUM;}
+{op}	{return opDec(*yytext);}
 [\n]	{return '\n';}
+[ ]		{}
+.		{yyerror("Unknown Character");}
 %%
 
+opDec(char c){
+	switch(c){
+		case '+':return PLUS;
+		case '-':return MIN;
+		case '*':return MUL;
+		case '/':return DIV;
+		case '%':return MOD;
+		default:return c;
+	}
+}
 yywrap(){
 	return 1;
 }
