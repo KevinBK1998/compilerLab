@@ -1,128 +1,45 @@
-//Code for creation and evaluation of an expression tree
+//Code for creation of an expression tree
 #include<stdio.h>
 #include<string.h>
 #include "exptree.h"
-tnode *makeOpNode(char ope,tnode *left,tnode *right){
+tnode *makeOpNode(char op,tnode *left,tnode *right){
   tnode *p=(tnode*)malloc(sizeof(tnode));
-  p->op=ope;
-  p->val=0;
+  p->var=op;
+  p->ntype=OPERATOR;
   p->l=left;
   p->r=right;
   return p;
 }
-tnode *makeLfNode(int n){
+tnode *makeNumNode(int n){
   tnode *p=(tnode*)malloc(sizeof(tnode));
-  p->op='0';
+  p->dtype=NUMERIC;
+  p->ntype=LEAF;
   p->val=n;
   p->l=NULL;
   p->r=NULL;
   return p;
 }
-
-int eval(tnode *t){
-    switch(t->op){
-      case '+':return eval(t->l)+eval(t->r);
-      case '-':return eval(t->l)-eval(t->r);
-      case '*':return eval(t->l)*eval(t->r);
-      case '/':return eval(t->l)/eval(t->r);
-      case '%':return eval(t->l)%eval(t->r);
-      default:return t->val;
-    }
+tnode *makeIdNode(char c){
+  tnode *p=(tnode*)malloc(sizeof(tnode));
+  p->dtype=IDENTIFIER;
+  p->ntype=LEAF;
+  p->var=c;
+  p->l=NULL;
+  p->r=NULL;
+  return p;
 }
-char *pst(tnode *t){
-  char *str;
-  int l;
-  if(!t->val)
-    l=strlen(pst(t->l))+strlen(pst(t->r))+4;
-  else
-    l=countDigit(t->val);
-  str=(char*)malloc(l*sizeof(char));
-  switch(t->op){
-    case '+':
-      strcpy(str,pst(t->l));
-      strcat(str," ");
-      strcat(str,pst(t->r));
-      strcat(str,"+ ");
-      break;
-    case '-':
-      strcpy(str,pst(t->l));
-      strcat(str," ");
-      strcat(str,pst(t->r));
-      strcat(str,"- ");
-      break;
-    case '*':
-      strcpy(str,pst(t->l));
-      strcat(str," ");
-      strcat(str,pst(t->r));
-      strcat(str,"* ");
-      break;
-    case '/':
-      strcpy(str,pst(t->l));
-      strcat(str," ");
-      strcat(str,pst(t->r));
-      strcat(str,"/ ");
-      break;
-    case '%':
-      strcpy(str,pst(t->l));
-      strcat(str," ");
-      strcat(str,pst(t->r));
-      strcat(str,"%% ");
-      break;
-    default:
-      sprintf(str,"%d",t->val);
-  }
-  return str;
+tnode *makeFnNode(int fcode,tnode *arg){
+  tnode *p=(tnode*)malloc(sizeof(tnode));
+  p->val=fcode;
+  p->ntype=FUNCTION;
+  p->l=arg;
+  p->r=NULL;
+  return p;
 }
-int pre(tnode *t){
-  char *str;
-  int l;
-  if(!t->val)
-    l=strlen(pst(t->l))+strlen(pst(t->r))+4;
-  else
-    l=countDigit(t->val);
-  str=(char*)malloc(l*sizeof(char));
-  switch(t->op){
-    case '+':
-      strcpy(str,"+ ");
-      strcat(str,pre(t->l));
-      strcat(str," ");
-      strcat(str,pre(t->r));      
-      break;
-    case '-':
-      strcpy(str,"- ");
-      strcat(str,pre(t->l));
-      strcat(str," ");
-      strcat(str,pre(t->r));      
-      break;
-    case '*':
-      strcpy(str,"* ");
-      strcat(str,pre(t->l));
-      strcat(str," ");
-      strcat(str,pre(t->r));      
-      break;
-    case '/':
-      strcpy(str,"/ ");
-      strcat(str,pre(t->l));
-      strcat(str," ");
-      strcat(str,pre(t->r));      
-      break;
-    case '%':
-      strcpy(str,"%% ");
-      strcat(str,pre(t->l));
-      strcat(str," ");
-      strcat(str,pre(t->r));      
-      break;
-    default:
-      sprintf(str,"%d",t->val);
-  }
-  return str;
+tnode *makeConNode(tnode *left,tnode *right){
+  tnode *p=(tnode*)malloc(sizeof(tnode));
+  p->ntype=CONNECTION;
+  p->l=left;
+  p->r=right;
+  return p;
 }
-int countDigit(long long n) 
-{ 
-    int count = 0; 
-    while (n != 0) { 
-        n = n / 10; 
-        ++count; 
-    } 
-    return count; 
-} 

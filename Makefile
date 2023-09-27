@@ -5,9 +5,9 @@ compile: build
 	./compiler.exe
 build: y.tab.c lex.yy.c
 	gcc y.tab.c lex.yy.c -o compiler.exe
-lex.yy.c: e3.l
+lex.yy.c: e1.l
 	lex $<
-y.tab.c: e3.y
+y.tab.c: e1.y
 	yacc -d $<
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h
