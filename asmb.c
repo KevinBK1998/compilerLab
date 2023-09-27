@@ -3,7 +3,7 @@
 #include<string.h>
 #include "asmb.h"
 #include "exptree.h"
-#define FOUT "x"
+#define FOUT "x.xobj"
 int regcount=-1,lblct=-1;
 FILE *out;
 int getReg(){
@@ -19,14 +19,66 @@ void freeReg(){
 int getLabel(){
   return ++lblct;
 }
+int getRVal(tnode *varNode){
+  int rega,regb;
+  tnode *expR=varNode->l;
+  tnode *expC=varNode->r;
+  snode *id=varNode->sym;
+  rega=getReg();
+  fprintf(out,"MOV R%d,%d\n",rega,id->bind);
+  if(expR){
+    regb=expCodeGen(expR);
+    if(expC){
+      int regt=getReg();
+      fprintf(out,"MOV R%d,%d\n",regt,id->rowsize);
+      fprintf(out,"MUL R%d,R%d\n",regb,regt);      
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+      freeReg();
+      regb=expCodeGen(expC);
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+    }
+    else{
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+    }
+  }
+  fprintf(out,"MOV R%d,[R%d]\n",rega,rega);
+  return rega;
+}
+int getLVal(tnode *varNode){
+  int rega,regb;
+  tnode *expR=varNode->l;
+  tnode *expC=varNode->r;
+  snode *id=varNode->sym;
+  rega=getReg();
+  fprintf(out,"MOV R%d,%d\n",rega,id->bind);
+  if(expR){
+    regb=expCodeGen(expR);    
+    if(expC){
+      int regt=getReg();
+      fprintf(out,"MOV R%d,%d\n",regt,id->rowsize);
+      fprintf(out,"MUL R%d,R%d\n",regb,regt);      
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+      freeReg();
+      regb=expCodeGen(expC);
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+    }
+    else{
+      fprintf(out,"ADD R%d,R%d\n",rega,regb);
+      freeReg();
+    }
+  }
+  return rega;
+}
 int codeInit(char *fnme){
-    char *target=(char*)malloc((5+strlen(fnme))*sizeof(char));
-    strcpy(target,fnme);
-    strcat(target,".xobj");
-    out=fopen(target,"w");
+    out=fopen(fnme,"w");
     fprintf(out,"%d\n%d\n%d\n%d\n",0,2056,0,0);
     fprintf(out,"%d\n%d\n%d\n%d\n",0,0,0,0);
-    fprintf(out,"MOV SP,%d\n",SP);
+    fprintf(out,"MOV SP,%d\n",GetMem());
     return 1;
 }
 int codeGen(tnode *root,int lc,int lb,int pos){
@@ -35,18 +87,20 @@ int codeGen(tnode *root,int lc,int lb,int pos){
       return expCodeGen(root);
     case FUNCTION:
       if(root->val)
-        return fnRead(root->l);
+        return codeRead(root->l);
       else
-        return fnWrite(root->l);
+        return codeWrite(root->l);
     case CONNECTION:
-      codeGen(root->l,lc,lb,pos);
-      codeGen(root->r,lc,lb,pos);
+      if(root->l)
+        codeGen(root->l,lc,lb,pos);
+      if(root->r)
+        codeGen(root->r,lc,lb,pos);     
       return 0;
     case CONTROL:
       ctrlCodeGen(root,lc,lb,pos);
       return 0;
     case JMP:
-      return brkFlowGen(root,lc,lb,pos);
+      return brkFlowGen(root,lc,lb,pos);    
   }
 }
 int brkFlowGen(tnode *root,int lc,int lb,int pos){
@@ -73,25 +127,25 @@ int brkFlowGen(tnode *root,int lc,int lb,int pos){
         codeGen(root->r,lc,lb,pos);
   }
 }
-int codeRead(int r){
-    int temp=getReg();
-    fprintf(out,"MOV R%d,7\t;Read Begins\nPUSH R%d\n",temp,temp);
-    fprintf(out,"MOV R%d,%d\t;Value stored here\nPUSH R%d\n",temp,r,temp);
-    fprintf(out,"CALL 0\n");
-    fprintf(out,"POP R%d\nPOP R%d\t;Read Ends\n",temp,temp);
-    freeReg();
-    freeReg();
-    return 1;
+int codeRead(tnode *t){
+  int reg=getLVal(t),temp=getReg();
+  fprintf(out,"MOV R%d,7\t;Read Begins\nPUSH R%d\n",temp,temp);
+  fprintf(out,"MOV R%d,R%d\t;Value stored here\nPUSH R%d\n",temp,reg,temp);
+  fprintf(out,"CALL 0\n");
+  fprintf(out,"POP R%d\nPOP R%d\t;Read Ends\n",temp,temp);
+  freeReg();
+  freeReg();
+  return 0;
 }
-int codeWrite(int r){
-    int temp=getReg();
-    fprintf(out,"MOV R%d,5\t;Write Begins\nPUSH R%d\n",temp,temp);
-    fprintf(out,"MOV R%d,R%d\t;Data taken from here\nPUSH R%d\n",temp,r,temp);
-    fprintf(out,"CALL 0\n");
-    fprintf(out,"POP R%d\nPOP R%d\t;Write Ends\n",temp,temp);
-    freeReg();
-    freeReg();
-    return 1;
+int codeWrite(tnode *t){
+  int reg=expCodeGen(t),temp=getReg();
+  fprintf(out,"MOV R%d,5\t;Write Begins\nPUSH R%d\n",temp,temp);
+  fprintf(out,"MOV R%d,R%d\t;Data taken from here\nPUSH R%d\n",temp,reg,temp);
+  fprintf(out,"CALL 0\n");
+  fprintf(out,"POP R%d\nPOP R%d\t;Write Ends\n",temp,temp);
+  freeReg();
+  freeReg();
+  return 0;
 }
 int codeExit(){
     int temp=getReg();
@@ -108,77 +162,131 @@ int codeAsmble(tnode *code){
       codeGen(code,-1,-1,OUT_LOOP);
     codeExit();
     fclose(out);
-    printf("Build Successful\n");
-    return 0;
+    return 1;
 }
 int expCodeGen(tnode *exp){
   int rega,regb,var;
   if(exp->ntype){
-    switch(exp->var){
-      case '+':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"ADD R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '*':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"MUL R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '-':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"SUB R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '/':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"DIV R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '%':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"MOD R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '<':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"LT R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '>':
-        rega=expCodeGen(exp->l);
-        regb=expCodeGen(exp->r);
-        fprintf(out,"GT R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '=':
-        var=getVar(exp->l);
-        rega=expCodeGen(exp->r);
-        fprintf(out,"MOV [%d],R%d\n",var,rega);
-        freeReg();
-        return rega;
+    if(strlen(exp->var)==1){
+      switch(exp->var[0]){
+        case '+':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"ADD R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '*':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"MUL R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '-':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"SUB R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '/':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"DIV R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '<':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"LT R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '>':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"GT R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '=':
+          rega=getLVal(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"MOV [R%d],R%d\n",rega,regb);
+          freeReg();
+          freeReg();
+          return rega;
+        case '!':
+          rega=expCodeGen(exp->l);
+          regb=getReg();
+          fprintf(out,"MOV R%d,%d\n",regb,0);
+          fprintf(out,"EQ R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+      }
+    }
+    else{
+      switch(exp->var[1]){
+        case '<':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"LE R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '>':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"GE R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '%':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"MOD R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '=':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"EQ R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '!':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"NE R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '|':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"ADD R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+        case '&':
+          rega=expCodeGen(exp->l);
+          regb=expCodeGen(exp->r);
+          fprintf(out,"MUL R%d,R%d\n",rega,regb);
+          freeReg();
+          return rega;
+      }
     }
   }
   switch(exp->dtype){
-    case NUMERIC:
+    case INTEGER:
       rega=getReg();
       fprintf(out,"MOV R%d,%d\n",rega,exp->val);
       return rega;
-    case IDENTIFIER:
+    case STRING:
       rega=getReg();
-      fprintf(out,"MOV R%d,[%d]\n",rega,getVar(exp));
+      fprintf(out,"MOV R%d,%s\n",rega,exp->var);
       return rega;
+  /*case IDENTIFIER:
+      return getRVal(exp);
+      */
   }
+  if(exp->ntype==IDENTIFIER)
+    return getRVal(exp);
 }
 int ctrlCodeGen(tnode *exp,int lc,int lb,int pos){
   int l1,l2,reg;
-  switch(exp->dtype){
+    switch(exp->dtype){
         case SIMPLE_IF:
           l1=getLabel();
           reg=expCodeGen(exp->l);
@@ -208,18 +316,23 @@ int ctrlCodeGen(tnode *exp,int lc,int lb,int pos){
           fprintf(out,"JMP L%d\nL%d:",l1,l2);
           freeReg();
           return 1;
+        case DO_LOOP:
+          l1=getLabel();
+          l2=getLabel();
+          fprintf(out,"L%d:",l1);
+          codeGen(exp->l,l1,l2,IN_LOOP);
+          reg=expCodeGen(exp->r);
+          fprintf(out,"JNZ R%d,L%d\nL%d:",reg,l1,l2);
+          freeReg();
+          return 1;
+        case REPEAT_LOOP:
+          l1=getLabel();
+          l2=getLabel();
+          fprintf(out,"L%d:",l1);
+          codeGen(exp->l,l1,l2,IN_LOOP);
+          reg=expCodeGen(exp->r);
+          fprintf(out,"JZ R%d,L%d\nL%d:",reg,l1,l2);
+          freeReg();
+          return 1;
     }
-}
-int fnRead(tnode *t){
-    int var=getVar(t);
-    codeRead(var);
-    return 0;
-}
-int fnWrite(tnode *t){
-    int reg=expCodeGen(t);
-    codeWrite(reg);
-    return 0;
-}
-int getVar(tnode *varNode){
-    return 4096+(varNode->var-'a');
 }

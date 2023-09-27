@@ -7,7 +7,7 @@ compile: compiler.exe code.expl
 	./compiler.exe code.expl
 compiler.exe: y.tab.c lex.yy.c asmb.c exptree.c
 	gcc y.tab.c lex.yy.c -o compiler.exe
-linker.exe: link.l
+linker.exe: link.l linklist.c
 	lex link.l
 	gcc lex.yy.c -o linker.exe
 	rm -f lex.yy.c

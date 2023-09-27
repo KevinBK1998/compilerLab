@@ -1,33 +1,47 @@
 %{
 //Lexical Analyser to identify numbers,identifiers,operators,keywords
 #include<stdio.h>
+#include<stdlib.h>
 #include "y.tab.h"
 #include "exptree.h"
 %}
 
-singleComment 		[/][/][-*+/%()=;<>!{}a-zA-Z0-9 ]*
 num [0-9]+
-op [-*+/%()=;<>!{}]
-id [a-z]
-beg [b][e][g][i][n]
-read [r][e][a][d]
-if [i][f]
-then [t][h][e][n]
-else [e][l][s][e]
-endif [e][n][d][i][f]
-while   [w][h][i][l][e]
-do  [d][o]
-endwhile    [e][n][d][w][h][i][l][e]
-write [w][r][i][t][e]
-end [e][n][d]
-break [b][r][e][a][k]
-continue [c][o][n][t][i][n][u][e]
+id [a-zA-Z][a-zA-Z0-9]*
+op [-*+/%()=;<>!{},\[\]]
+string ["][\40-\176]*["]
+and "and"
+or "or"
+not "not"
+beg "begin"
+read "read"
+if "if"
+then "then"
+else "else"
+endif "endif"
+while   "while"
+do      "do"
+endwhile    "endwhile"
+repeat "repeat"
+until "until"
+break "break"
+continue "continue"
+write "write"
+decl "decl"
+int_type "int"
+str_type "str"
+enddecl "enddecl"
+end "end"
 
 %%
-{singleComment} {}
 {num}   {int i=atoi(yytext);yylval.node=makeNumNode(i);return NUM;}
 {op}    {return *yytext;}
-{id}    {char c=*yytext;yylval.node=makeIdNode(c);return ID;}
+"<="    {return LSEQ;}
+">="    {return GTEQ;}   
+"=="    {return EQTO;}
+"!="    {return NTEQ;}
+"++"    {return INCRMNT;}
+"--"    {return DECRMNT;}
 {beg}   {return BEG;}
 {if}    {return IF;}
 {else}  {return ELSE;}
@@ -35,14 +49,24 @@ continue [c][o][n][t][i][n][u][e]
 {endif} {return ENDIF;}
 {while} {return WHILE;}
 {do}    {return DO;}
+{repeat}    {return REPEAT;}
+{until}     {return UNTIL;}
+{endwhile} {return ENDWHILE;}
 {break} {return BREAK;}
 {continue} {return CONTINUE;}
-{endwhile} {return ENDWHILE;}
 {read}  {return READ;}
 {write} {return WRITE;}
+{decl} {return DECL;}
+{int_type} {return INT_TYPE;}
+{str_type} {return STR_TYPE;}
+{enddecl} {return ENDDECL;}
+{and} {return AND;}
+{or} {return OR;}
+{not} {return NOT;}
 {end}   {return END;}
-[\n]    {return LINE;}
-
+{id}    {yylval.node=makeIdNode(yytext);return ID;}
+{string}    {yylval.node=makeStrNode(yytext);return STR;}
+[\n]    {}
 . {}
 %%
 
