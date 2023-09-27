@@ -1,3 +1,6 @@
+XSM_DIR = ~/compilerLab/xsm_expl
+copy: a.xsm
+	cp $< ${XSM_DIR}
 compile: evaluator.exe
 	./evaluator.exe
 build: y.tab.c lex.yy.c

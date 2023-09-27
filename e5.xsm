@@ -1,0 +1,54 @@
+0               ;Program to input numbers until zero and print their sum
+2056
+0
+0
+0
+0
+0
+0
+BRKP
+MOV R0,0
+MOV SP, 4096      
+MOV R3, 7       ;Read
+PUSH R3
+MOV R3, -1
+PUSH R3
+MOV R2,4096
+PUSH R2
+PUSH R3
+PUSH R3
+INT 6
+POP R2
+POP R3
+POP R3
+POP R3
+POP R3
+MOV R1,[4096]
+JZ R1,2098
+ADD R0,R1
+JMP 2062
+MOV R3, 5       ;Write result
+PUSH R3
+MOV R3, -2
+PUSH R3
+PUSH R0
+PUSH R3
+PUSH R3
+INT 7
+POP R0
+POP R3
+POP R3
+POP R3
+POP R3
+MOV R3,10       ;exit
+PUSH R3
+PUSH R3
+PUSH R3
+PUSH R3
+PUSH R3
+INT 10
+POP R0
+POP R1
+POP R1
+POP R1
+POP R1

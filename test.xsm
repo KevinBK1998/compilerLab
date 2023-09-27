@@ -1,0 +1,23 @@
+0                 //Program to print output to console
+2056
+0
+0
+0
+0
+0
+0
+BRKP
+MOV SP,4096
+MOV R2,7
+PUSH R2
+MOV R2,4096
+PUSH R2
+CALL 0
+POP R11
+POP R11
+MOV R2,10
+PUSH R2
+PUSH R2
+CALL 0
+POP R11
+POP R11
