@@ -6,4 +6,5 @@ y.tab.h
 compiler.exe
 linker.exe
 xsm_expl
+out.xobj
 out.xexe

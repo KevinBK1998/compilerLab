@@ -1,12 +1,10 @@
 //Control Type
 #define SIMPLE_IF 0
 #define IF_ELSE 1
-#define IF_ELSE_HEAD 2
-#define WHILE_LOOP 3
-#define IF_THEN 4
+#define WHILE_LOOP 2
 //Function type
-#define FN_READ 1
 #define FN_WRITE 0
+#define FN_READ 1
 //Data type
 #define NO_TYPE 0
 #define INTEGER 1
@@ -25,11 +23,11 @@ typedef struct tnode{
     int dtype;
     char var;
     int ntype;
-    struct tnode *l,*r;
+    struct tnode *l,*r,*e;
 }tnode;
 tnode *makeOpNode(char,tnode*,tnode*,int);
 tnode *makeNumNode(int);
 tnode *makeIdNode(char);
 tnode *makeFnNode(int,tnode*);
 tnode *makeConNode(tnode*,tnode*);
-tnode *CtrlNode(tnode*,tnode*,int);
+tnode *CtrlNode(tnode*,tnode*,tnode*,int);

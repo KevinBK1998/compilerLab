@@ -17,7 +17,7 @@ int evalCode(tnode *t){
         evalCode(t->r);
         return 0;
       case CONTROL:
-        evalCtrl(t);//add code
+        evalCtrl(t);
         return 0;
     }
 }
@@ -66,15 +66,14 @@ int evalCtrl(tnode *t){
         case SIMPLE_IF:
             if(evalCode(t->l)){
                 evalCode(t->r);
-                return 0;
+                return 1;
             }
-            return 1;
-        case IF_ELSE:
-            evalCode(t->l);
             return 0;
-        case IF_ELSE_HEAD:
-            if(evalCtrl(t->l))
-                return evalCode(t->r);
+        case IF_ELSE:
+            if(evalCode(t->l))
+                evalCode(t->r);
+            else
+                evalCode(t->e);
         case WHILE_LOOP:
             if(evalCode(t->l)){
                 evalCode(t->r);
