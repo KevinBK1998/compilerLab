@@ -1,39 +1,31 @@
 %{
-//Parser to identify if statement and show nesting levels
+//Parser to print postfix of an infix expression made of operators and single letters
+//eg:a+b
 #include<stdio.h>
 #include<stdlib.h>
-int pos=0;
+#define YYSTYPE char
 %}
 
-%token DIGIT
-%left '<'
+%token ID
+%left '+''-'
+%left '*''/''%'
 %left '('')'
 
 %%
-PRG:STAT'\n'{exit(1);}
+prg:	expr'\n'	{printf("\nBYE\n");}
 	;
-STAT:IF '(' COND ')' STAT{printf("NEST %d ",++pos);}
-	|EXP';'
-;
-IF:'i''f';
-COND:EXP '<'EXP
-;
-EXP:|EXP '<'EXP
-	|DIGIT;
+expr:	expr'+'expr	{printf("+");}
+	|expr'-'expr	{printf("-");}
+	|expr'*'expr	{printf("*");}
+	|expr'/'expr	{printf("/");}
+	|expr'%'expr	{printf("%%");}
+	|'('expr')'
+	|ID		{printf("%c",$1);}
+	;
 %%
 
-int yylex()
-{
-	int c;
-	c = getchar();
-	if(isdigit(c))
-		return DIGIT;
-	else
-		return c;
-}
-int yyerror(){
-	printf("-error-");
-	return 1;
+yyerror(){
+	printf("ERROR ");
 }
 int main(){
 	yyparse();

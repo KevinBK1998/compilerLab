@@ -1,25 +1,21 @@
 %{
-//Lexical Analyser to count integers,floating point numbers
+//Lexical Analyser to identify operators and string as tokens
+//eg:"hello",'+',"world"
 #include<stdio.h>
-int i,f;
+#include<stdlib.h>
+#include<string.h>
+#include "y.tab.h"
 %}
 
-digit [0-9]
+id [a-zA-Z]+
+op [-+*/%]
 
 %%
-{digit}+ {i++;}
-[.] {}
-{digit}*[.]{digit}* {f++;}
-
+{id}	{yylval=(char*)malloc(yyleng*sizeof(char));strcpy(yylval,yytext);return ID;}
+{op}	{return *yytext;}
+[\n]	{return '\n';}
 %%
 
-int yywrap(){
-	return 1;
-}
-
-int main(){
-	i=f=0;
-	yylex();
-	printf("Integers:%d\nFloating Point:%d\n",i,f);
+yywrap(){
 	return 1;
 }

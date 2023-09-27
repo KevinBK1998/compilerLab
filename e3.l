@@ -1,25 +1,21 @@
 %{
-/*Lexical analyser to print a word in uppercase if word 
-1.starts with 'A',and
-2.has 3 letters
-*/
+//Lexical Analyser to identify operators and string as tokens
+//eg:"hello",'+',"world"
 #include<stdio.h>
-#include<ctype.h>
+#include<stdlib.h>
+#include<string.h>
+#include "y.tab.h"
 %}
 
-line [\n]
-letter [a-zA-Z]
+id [a-zA-Z]+
+op [-+*/%]
 
 %%
-[A]{letter}{letter} {printf("%c%c%c\n",toupper(*yytext),toupper(*(yytext+1)),toupper(*(yytext+2)));}
-. {;}
+{id}	{yylval=(char*)malloc(yyleng*sizeof(char));strcpy(yylval,yytext);return ID;}
+{op}	{return *yytext;}
+[\n]	{return '\n';}
 %%
 
-int yywrap(){
-	return 1;
-}
-
-int main(){
-	yylex();
+yywrap(){
 	return 1;
 }

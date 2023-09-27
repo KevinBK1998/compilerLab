@@ -1,26 +1,20 @@
 %{
-//Lexical Analyser to count lines,words,characters
+//Lexical Analyser to identify single letters as identifiers and operators
+//eg:'a','+','b'
 #include<stdio.h>
-int l,w,c;
+#include "y.tab.h"
 %}
 
-line [\n]
-letter [a-zA-Z]
+id [a-zA-Z]
+op [-+*/%]
 
 %%
-{line} {l++;}
-{letter}+ {w++;c+=yyleng;}
-. {c+=yyleng;}
-
+{id}	{yylval=*yytext;return ID;}
+{op}	{return *yytext;}
+[\n]	{return '\n';}
 %%
 
-int yywrap(){
+yywrap(){
 	return 1;
 }
 
-int main(){
-	l=c=w=0;
-	yylex();
-	printf("Lines:%d\nWords:%d\nCharacters:%d\n",l,w,c);
-	return 1;
-}

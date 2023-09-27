@@ -1,46 +1,33 @@
 %{
-//Parser to check if a word is a valid variable
+//Parser to print postfix of an infix expression made of strings and operators
+//eg:hello+world
 #include<stdio.h>
 #include<stdlib.h>
+#define YYSTYPE char*
 %}
 
-%token DIGIT
-%token LETTER
+%token ID
+%left '+''-'
+%left '*''/''%'
+%left '('')'
 
 %%
-strt:var'\n' {printf("\nSuccess\n");exit(1);}
+prg:	expr'\n'	{printf("\nBYE\n");}
 	;
-var:LETTER expr {printf("Is a valid Variable.\n");}
-	|LETTER {printf("Is a valid Variable.\n");}
-	;
-expr: DIGIT	
-	|LETTER
- 	|expr DIGIT 
-	|expr LETTER
+expr:	expr'+'expr	{printf("+ ");}
+	|expr'-'expr	{printf("- ");}
+	|expr'*'expr	{printf("* ");}
+	|expr'/'expr	{printf("/ ");}
+	|expr'%'expr	{printf("% ");}
+	|'('expr')'
+	|ID		{printf("%s ",$1);}
 	;
 %%
 
-int yylex()
-{
-	int c;
-	c = getchar();
-	if(isdigit(c))
-	{
-		return DIGIT;
-
-	}
-	else if(isalpha(c))
-	{
-		return LETTER;
-	}
-	return c;
-}
-int yyerror(){
-	printf("Not a valid Variable.\n");
-	return 1;
+yyerror(){
+	printf("ERROR ");
 }
 int main(){
 	yyparse();
 	return 1;
 }
-
