@@ -9,8 +9,8 @@ eg:begin
 */
 #include<stdio.h> 
 #include "exptree.c"
-#include "evaluate.c"
-//#include "asmb.c"
+//#include "evaluate.c"
+#include "asmb.c"
 #define YYSTYPE tnode*
 %}
 
@@ -48,14 +48,14 @@ stm:stm LINE    {$$=$1;}
 ctrl:ifstm      {$$=$1;}
     |whilestm   {$$=$1;}
     ;
-ifstm:IF '('exp')' THEN block ELSE block  ENDIF ';'             {tnode*ifnode=makeCtrlNode($3,$6,SIMPLE_IF);tnode*elsenode=makeCtrlNode($8,NULL,IF_ELSE);$$=makeCtrlNode(ifnode,elsenode,IF_ELSE_HEAD);}
-    |IF '('exp')' THEN LINE block ELSE block  ENDIF ';'         {tnode*ifnode=makeCtrlNode($3,$7,SIMPLE_IF);tnode*elsenode=makeCtrlNode($9,NULL,IF_ELSE);$$=makeCtrlNode(ifnode,elsenode,IF_ELSE_HEAD);}
-    |IF '('exp')' THEN LINE block ELSE LINE block  ENDIF ';'    {tnode*ifnode=makeCtrlNode($3,$7,SIMPLE_IF);tnode*elsenode=makeCtrlNode($10,NULL,IF_ELSE);$$=makeCtrlNode(ifnode,elsenode,IF_ELSE_HEAD);}
-    |IF '('exp')' THEN block  ENDIF ';'                       {$$=makeCtrlNode($3,$6,SIMPLE_IF);}
-    |IF '('exp')' THEN LINE block ENDIF ';'                  {$$=makeCtrlNode($3,$7,SIMPLE_IF);}
+ifstm:IF '('exp')' THEN block ELSE block  ENDIF ';'             {$$=makeCtrlNode($3,$6,$8,IF_ELSE);}
+    |IF '('exp')' THEN LINE block ELSE block  ENDIF ';'         {$$=makeCtrlNode($3,$7,$9,IF_ELSE);}
+    |IF '('exp')' THEN LINE block ELSE LINE block  ENDIF ';'    {$$=makeCtrlNode($3,$7,$10,IF_ELSE);}
+    |IF '('exp')' THEN block  ENDIF ';'                         {$$=makeCtrlNode($3,$6,NULL,SIMPLE_IF);}
+    |IF '('exp')' THEN LINE block ENDIF ';'                     {$$=makeCtrlNode($3,$7,NULL,SIMPLE_IF);}
     ;
-whilestm:WHILE '('exp')' DO block  ENDWHILE ';'   {$$=makeCtrlNode($3,$6,WHILE_LOOP);}
-    |WHILE '('exp')' DO LINE block  ENDWHILE ';'  {$$=makeCtrlNode($3,$7,WHILE_LOOP);}
+whilestm:WHILE '('exp')' DO block  ENDWHILE ';'   {$$=makeCtrlNode($3,$6,NULL,WHILE_LOOP);}
+    |WHILE '('exp')' DO LINE block  ENDWHILE ';'  {$$=makeCtrlNode($3,$7,NULL,WHILE_LOOP);}
     ;
 inp:READ '(' ID ')' ';'     {$$=makeFnNode(FN_READ,$3);}
     ;
@@ -82,7 +82,7 @@ yyerror(char *err){
 }
 int main(){
     printf("Start Coding:\n");
-    evalCode(yyparse());
+    codeAsmble(yyparse());
    	return 1;
 }
 

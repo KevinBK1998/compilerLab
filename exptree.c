@@ -50,7 +50,7 @@ tnode *makeConNode(tnode *left,tnode *right){
   p->r=right;
   return p;
 }
-tnode *makeCtrlNode(tnode *left,tnode *right,int type){
+tnode *makeCtrlNode(tnode *left,tnode *right,tnode *Else,int type){
   if((type==SIMPLE_IF||type==WHILE_LOOP)&&left->dtype!=BOOLEAN)
   {
     printf("Type Mismatch:Expected Boolean\n");
@@ -61,5 +61,6 @@ tnode *makeCtrlNode(tnode *left,tnode *right,int type){
     p->dtype=type;
     p->l=left;
     p->r=right;
+    p->e=Else;
     return p;
 }

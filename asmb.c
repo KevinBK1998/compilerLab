@@ -2,23 +2,27 @@
 #include<stdio.h>
 #include<string.h>
 #include "asmb.h"
+#define FOUT "e2" 
 //#include "exptree.c"  //comment before use
-int count=-1;
+int regcount=-1,lblct=-1;
 FILE *out;
 int getReg(){
-    if(count<RMAX-1)
-      return ++count;
+    if(regcount<RMAX-1)
+      return ++regcount;
     printf("Error:Out of Free Registers\n");
     exit(0);
 }
 void freeReg(){
-    if(count>-1)
-        count--;
+  if(regcount>-1)
+    regcount--;
+}
+int getLabel(){
+  return ++lblct;
 }
 int codeInit(char *fnme){
     char *target=(char*)malloc((5+strlen(fnme))*sizeof(char));
     strcpy(target,fnme);
-    strcat(target,".xexe");
+    strcat(target,".xobj");
     out=fopen(target,"w");
     fprintf(out,"%d\n%d\n%d\n%d\n",0,2056,0,0);
     fprintf(out,"%d\n%d\n%d\n%d\n",0,0,0,0);
@@ -38,6 +42,9 @@ int codeGen(tnode *root){
       codeGen(root->l);
       codeGen(root->r);
       return 0;
+    case CONTROL:
+        ctrlCodeGen(root);
+        return 0;
   }
 }
 int codeRead(int r){
@@ -70,7 +77,7 @@ int codeExit(){
     return 1;
 }
 int codeAsmble(tnode *code){
-    codeInit("out");
+    codeInit(FOUT);
     if(code)
       codeGen(code);
     codeExit();
@@ -94,6 +101,36 @@ int expCodeGen(tnode *exp){
         fprintf(out,"MUL R%d,R%d\n",rega,regb);
         freeReg();
         return rega;
+      case '-':
+        rega=expCodeGen(exp->l);
+        regb=expCodeGen(exp->r);
+        fprintf(out,"SUB R%d,R%d\n",rega,regb);
+        freeReg();
+        return rega;
+      case '/':
+        rega=expCodeGen(exp->l);
+        regb=expCodeGen(exp->r);
+        fprintf(out,"DIV R%d,R%d\n",rega,regb);
+        freeReg();
+        return rega;
+      case '%':
+        rega=expCodeGen(exp->l);
+        regb=expCodeGen(exp->r);
+        fprintf(out,"MOD R%d,R%d\n",rega,regb);
+        freeReg();
+        return rega;
+      case '<':
+        rega=expCodeGen(exp->l);
+        regb=expCodeGen(exp->r);
+        fprintf(out,"LT R%d,R%d\n",rega,regb);
+        freeReg();
+        return rega;
+      case '>':
+        rega=expCodeGen(exp->l);
+        regb=expCodeGen(exp->r);
+        fprintf(out,"GT R%d,R%d\n",rega,regb);
+        freeReg();
+        return rega;
       case '=':
         var=getVar(exp->l);
         rega=expCodeGen(exp->r);
@@ -112,43 +149,40 @@ int expCodeGen(tnode *exp){
       fprintf(out,"MOV R%d,[%d]\n",rega,getVar(exp));
       return rega;
   }
-  /*switch(root->op){
-      case '+':
-        rega=codeGen(root->l);
-        regb=codeGen(root->r);
-        fprintf(out,"ADD R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '-':
-        rega=codeGen(root->l);
-        regb=codeGen(root->r);
-        fprintf(out,"SUB R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '*':
-        rega=codeGen(root->l);
-        regb=codeGen(root->r);
-        fprintf(out,"MUL R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '/':
-        rega=codeGen(root->l);
-        regb=codeGen(root->r);
-        fprintf(out,"DIV R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      case '%':
-        rega=codeGen(root->l);
-        regb=codeGen(root->r);
-        fprintf(out,"MOD R%d,R%d\n",rega,regb);
-        freeReg();
-        return rega;
-      default:
-        rega=getReg();
-        fprintf(out,"MOV R%d,%d\n",rega,root->val);
-        return rega;
+}
+int ctrlCodeGen(tnode *exp){
+  int l1,l2,reg;
+    switch(exp->dtype){
+        case SIMPLE_IF:
+          l1=getLabel();
+          reg=expCodeGen(exp->l);
+          fprintf(out,"JZ R%d,L%d\n",reg,l1);
+          codeGen(exp->r);
+          fprintf(out,"L%d:",l1);
+          freeReg();
+          return 1;
+        case IF_ELSE:
+          l1=getLabel();
+          l2=getLabel();
+          reg=expCodeGen(exp->l);
+          fprintf(out,"JZ R%d,L%d\n",reg,l1);
+          codeGen(exp->r);
+          fprintf(out,"JMP L%d\nL%d:",l2,l1);
+          codeGen(exp->e);
+          fprintf(out,"L%d:",l2);  
+          freeReg();       
+          return 1;
+        case WHILE_LOOP:
+          l1=getLabel();
+          l2=getLabel();
+          fprintf(out,"L%d:",l1);
+          reg=expCodeGen(exp->l);
+          fprintf(out,"JZ R%d,L%d\n",reg,l2);
+          codeGen(exp->r);
+          fprintf(out,"JMP L%d\nL%d:",l1,l2);
+          freeReg();
+          return 1;
     }
-  */
 }
 int fnRead(tnode *t){
     int var=getVar(t);
