@@ -8,9 +8,7 @@ eg:begin
    end;
 */
 #include<stdio.h> 
-#include<stdlib.h>
 #include "exptree.c"
-#include "evaluate.c"
 #define YYSTYPE tnode*
 %}
 
@@ -21,10 +19,10 @@ eg:begin
 %left BOP BCL
 
 %%
-prg:code LINE          {printf("Tree Created\n");return $1;}
+prg:code LINE          {printf("Tree Created\n");}
 ;
 code:begin block END SCLN {$$=$2;}
-    |begin END SCLN       {printf("Empty Tree\n");return NULL;}
+    |begin END SCLN       {printf("Empty\n");}
     ;
 begin:BEG LINE
     |BEG
@@ -55,11 +53,7 @@ yyerror(char *err){
    	printf("ERROR:%s\n",err);
 }
 int main(){
-    tnode *tree;
-    tree=yyparse();
-    printf("Executing Program:\n");
-    evalCode(tree);
-    printf("Program complete\n");
+    yyparse();
    	return 1;
 }
 

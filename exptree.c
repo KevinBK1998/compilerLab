@@ -1,4 +1,4 @@
-//Code for creation of an expression tree
+//Code for creation and evaluation of an expression tree
 #include<stdio.h>
 #include<string.h>
 #include "exptree.h"
