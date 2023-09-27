@@ -2,8 +2,6 @@
 //Lexical Analyser for label translation
 #include<stdio.h>
 #include "linklist.c"
-#define FIN "x.xobj" 
-#define FOUT "out.xexe"
 int pass2,ip;
 char lblnme[4];
 node *lbl;
@@ -26,7 +24,7 @@ int yywrap(){
         return 1;
     pass2++;
     ip=2040;
-    yyin=fopen(FIN,"r");
+    yyin=fopen("x.xobj","r");
     return 0;
 	
 }
@@ -34,8 +32,8 @@ int main(){
     ip=2040;
     pass2=0;
     lbl=NULL;
-    yyin=fopen(FIN,"r");
-    f=fopen(FOUT,"w");
+    yyin=fopen("x.xobj","r");
+    f=fopen("out.xexe","w");
     yylex();    
     return 0;
 }

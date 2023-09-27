@@ -76,7 +76,7 @@ int codeExit(){
     return 1;
 }
 int codeAsmble(tnode *code){
-    codeInit("out");
+    codeInit("x");
     if(code)
       codeGen(code);
     codeExit();
